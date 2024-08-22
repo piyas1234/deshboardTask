@@ -7,9 +7,10 @@ export const stylesFnc = (colors: any) => StyleSheet.create({
     userInfoSection: {
       flexDirection: "row",
       alignItems: "center",
-      padding: 16,
+     
       borderBottomWidth: 1,
-      borderBottomColor: "#ccc"
+      borderBottomColor: "#ccc",
+      paddingVertical:10
     },
     avatar: {
       width: 60,
@@ -40,7 +41,7 @@ export const stylesFnc = (colors: any) => StyleSheet.create({
       alignItems: "center",
       justifyContent: "space-between",
       marginTop: 10,
-      borderWidth: 0.2,
+      
       padding: 5,
       paddingHorizontal: 10,
       borderRadius: 10,

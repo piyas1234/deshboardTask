@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
- 
 import DrawerNavigation from "../drawerNav";
-import { getAccessToken } from "../../global/NetworkProvider";
 import LoginScreen from "../../screens/LoginScreen";
- 
+import { keys } from "../../utils/keys";
+import * as SecureStore from "expo-secure-store";
+import { useNetwork } from "../../global/NetworkProvider";
+
 const StackNav = ({ theme }) => {
   const Stack = createStackNavigator();
   const [screen, setScreen] = useState("loading");
+  const network = useNetwork()
 
   useEffect(() => {
     getData();
@@ -16,9 +18,11 @@ const StackNav = ({ theme }) => {
 
   const getData = async () => {
     try {
-      const token = await getAccessToken();
+      await network.getAccessToken();
+      await network.getUserInfo();
+      const token = await SecureStore.getItemAsync(keys.token);
 
-      if (token == null) {
+      if (token == null || token == "") {
         setScreen("Login");
       } else {
         setScreen("DrawerNav");

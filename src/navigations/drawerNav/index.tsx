@@ -1,61 +1,67 @@
 import * as React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { View, Text, StyleSheet, Image, Alert } from "react-native";
+import { View, Text,  Alert } from "react-native";
 import {
   Provider as PaperProvider,
   useTheme,
   Switch,
-  Button
+  Button,
+  Avatar,
+  TouchableRipple
 } from "react-native-paper";
- 
-import * as SecureStore from 'expo-secure-store';
+
+import * as SecureStore from "expo-secure-store";
 import { useNetwork } from "../../global/NetworkProvider";
 import { stylesFnc } from "../../styleSheets/drawerStyleSheet";
 import { keys } from "../../utils/keys";
 import HomeScreen from "../../screens/HomeScreen";
 import SettingScreen from "../../screens/SettingScreen";
- 
 
 const Drawer = createDrawerNavigator();
 
-function CustomDrawerContent({ navigation, toggleTheme, isDarkTheme, user, setIsDarkTheme }) {
+function CustomDrawerContent({
+  navigation,
+  toggleTheme,
+  isDarkTheme,
+  user,
+  setIsDarkTheme
+}) {
   const theme = useTheme();
   const { colors } = useTheme();
   const network = useNetwork();
   const styles = stylesFnc(colors);
 
+  console.log(network);
   const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to log out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "OK",
-          onPress: async () => {
-            try {
-              const res = await network.authNetwork.post("logout");
-              console.log(res);
-              if (res.status === 200) {
-                 
-                await SecureStore.deleteItemAsync(keys.token);
-                await SecureStore.deleteItemAsync(keys.user);
-                
-                navigation.navigate('Login');
-              } else {
-                Alert.alert('Logout Failed', 'Something went wrong during logout');
-              }
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Logout Error', 'An error occurred while logging out');
+    Alert.alert("Logout", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        style: "cancel"
+      },
+      {
+        text: "OK",
+        onPress: async () => {
+          try {
+            const res = await network.authNetwork.post("logout");
+            console.log(res);
+            if (res.status === 200) {
+              await SecureStore.deleteItemAsync(keys.token);
+              await SecureStore.deleteItemAsync(keys.user);
+
+              navigation.navigate("Login");
+            } else {
+              Alert.alert(
+                "Logout Failed",
+                "Something went wrong during logout"
+              );
             }
+          } catch (error) {
+            console.error("Logout error:", error);
+            Alert.alert("Logout Error", "An error occurred while logging out");
           }
         }
-      ]
-    );
+      }
+    ]);
   };
 
   return (
@@ -65,33 +71,49 @@ function CustomDrawerContent({ navigation, toggleTheme, isDarkTheme, user, setIs
         { backgroundColor: theme.colors.background, marginTop: 50 }
       ]}
     >
-      <View style={styles.userInfoSection}>
-        <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        <View>
-          <Text style={[styles.userName, { color: theme.colors.text }]}>
-            {user.name}
-          </Text>
-          <Text style={[styles.userEmail, { color: theme.colors.text }]}>
-            {user.email}
-          </Text>
+      <View
+        style={{
+          padding: 16
+        }}
+      >
+        <Avatar.Text label="A" />
+        <View style={styles.userInfoSection}>
+          <View>
+            <Text style={[styles.userName, { color: theme.colors.text }]}>
+              {user.name}
+            </Text>
+            <Text style={[styles.userEmail, { color: theme.colors.text }]}>
+              {user.email}
+            </Text>
+          </View>
         </View>
       </View>
 
       <View style={styles.drawerContent}>
-        <Button
-          mode="outlined"
+        <TouchableRipple
           onPress={() => navigation.navigate("Home")}
-          style={styles.drawerButton}
+          style={[
+            styles.themeToggle,
+            {
+              paddingVertical: 10
+            }
+          ]}
         >
-          Home
-        </Button>
-        <Button
-          mode="outlined"
+          <Text style={{ color: theme.colors.primary }}>Home</Text>
+        </TouchableRipple>
+
+        <TouchableRipple
           onPress={() => navigation.navigate("Settings")}
-          style={styles.drawerButton}
+          style={[
+            styles.themeToggle,
+            {
+              paddingVertical: 10
+            }
+          ]}
         >
-          Settings
-        </Button>
+          <Text style={{ color: theme.colors.primary }}>Settings</Text>
+        </TouchableRipple>
+
         <View style={styles.themeToggle}>
           <Text style={{ color: theme.colors.primary }}>Dark Theme</Text>
           <Switch
@@ -120,18 +142,22 @@ function CustomDrawerContent({ navigation, toggleTheme, isDarkTheme, user, setIs
 
 function DrawerNavigation() {
   const [isDarkTheme, setIsDarkTheme] = React.useState(false);
-  const { toggleTheme } = useNetwork();
+  const { toggleTheme, user } = useNetwork();
 
   const theme = useTheme();
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://example.com/avatar.jpg" // Replace with actual image URL or require local image
-  };
 
   return (
     <PaperProvider theme={theme}>
       <Drawer.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: theme.colors.primary // Set header background color
+          },
+          headerTintColor: "white", // Set header text color
+          headerTitleStyle: {
+            fontWeight: "bold"
+          }
+        }}
         drawerContent={(props) => (
           <CustomDrawerContent
             {...props}
@@ -149,7 +175,4 @@ function DrawerNavigation() {
   );
 }
 
- 
-
 export default DrawerNavigation;
- 

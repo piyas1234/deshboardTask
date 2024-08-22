@@ -26,7 +26,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const {colors} = useTheme()
 
   const validateUid = (uid: string): boolean => {
-    // Implement UID validation logic
+     
     return uid.trim().length > 0;
   };
 
@@ -61,7 +61,8 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         // Handle success, e.g., save token and navigate
         console.log(response.data);
  
-        // Assuming you want to save the token and navigate
+        Network.setToken(response.data.token)
+        Network.setUser(response.data.user)
         await SecureStore.setItemAsync(keys.token, response.data.token);
         await SecureStore.setItemAsync(keys.user, JSON.stringify(response.data.user));
         navigation.navigate('DrawerNav');

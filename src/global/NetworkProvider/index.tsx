@@ -10,9 +10,13 @@ export const BASE_URL = 'https://admin.prorota.app/api'; // Set your base URL he
 interface NetworkContextProps {
   authNetwork: AxiosInstance;
   publicNetwork: AxiosInstance;
+  token: string;
+  setToken: React.Dispatch<React.SetStateAction<string>>;
   user:object;
   setUser:React.Dispatch<React.SetStateAction<object>>;
-  toggleTheme:any
+  toggleTheme:any;
+  getAccessToken:any;
+  getUserInfo:any;
 }
 
 export const NetworkContext = createContext<NetworkContextProps | undefined>(undefined);
@@ -30,19 +34,17 @@ interface NetworkProviderProps {
   toggleTheme:any
 }
 
-
-export const getAccessToken = async () => {
-  const storedToken = await SecureStore.getItemAsync(keys.token);
-  return storedToken;
-};
-
 export function NetworkProvider({ children  , toggleTheme }: NetworkProviderProps) {
+  const [token, setToken] = useState<string>('');
   const [user, setUser ] = useState<object>({});
  
 
 
   // Fetch the access token
- 
+  const getAccessToken = async () => {
+    const storedToken = await SecureStore.getItemAsync(keys.token);
+    setToken(storedToken || '');
+  };
 
   const getUserInfo = async () => {
     const storedUser = await SecureStore.getItemAsync(keys.user);
@@ -60,8 +62,7 @@ export function NetworkProvider({ children  , toggleTheme }: NetworkProviderProp
 
   // Add request interceptor for authNetwork
   authNetwork.interceptors.request.use(
-    async (config: AxiosRequestConfig) => {
-       const token =   await getAccessToken();
+    (config: AxiosRequestConfig) => {
       config.headers = {
         Accept: 'application/json',
         Authorization: token ? `Bearer ${token}` : '',
@@ -90,20 +91,20 @@ export function NetworkProvider({ children  , toggleTheme }: NetworkProviderProp
     }
   );
 
-  // Fetch token when the component mounts
-  useEffect(() => {
-    getAccessToken();
-    getUserInfo();
-  }, []);
+ 
 
   return (
     <NetworkContext.Provider
       value={{
         authNetwork,
         publicNetwork,
+        token, 
+        setToken,
         user,
         setUser,
-        toggleTheme
+        toggleTheme,
+        getAccessToken,
+        getUserInfo,
       }}
     >
       {children}
